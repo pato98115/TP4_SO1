@@ -8,7 +8,6 @@ Trabajo practico nro 4 de la materia sistemas operativos 1 de la FCEFyN-UNC
 
 ---
 ## **Para el usuario:**
-
 Cada bloque de memoria tiene direcciones virtuales, las cuales aquellas utilizadas son las que existen como direcciones fisicas.
 Estos bloques de memoria poseen un break, que consiste en una direccion limite que separa las direcciones de memoria utilizadas de las que no se utilizan. Este break puede desplazarse para asignar al bloque mas memoria.
 Estos bloques de memoria a nivel codigo C, se lo plantea como una estructura que consiste de:
@@ -26,30 +25,20 @@ Un bloque puede liberarse, de esta manera puede fusionarse con otro bloque libre
 El desarollo del programa comienza con llamados a la funcion malloc 5 veces para asignar bloques de distintos tamaños.
 
 
-## **Para el desarrollador
+## Para el desarrollador
 
 * void* malloc(size_t size): Se encarga de aliear el tamaño recibido como parámetro al multiplo de 4 mas cercano, luego se controla que dicho tamaño sea positivo. Luego se controla la dirección base para verificar si es la primera vez que se llama a la funcion malloc, en casi de serlo, se extiende el heap(cuya utilidad se verá a continuación), se controla que si la extención se pudo realizar con éxito. Si se pudo realizar con éxito se cambia la dirección base a la del bloque creado. En caso de no ser la primera vez que se llama la función malloc, se busca si hay un bloque libre del tamaño requerido o mayor, para ello se recorre la lista desde el principio, en caso de no encontrarse un bloque, se extiende el heap, y en caso de encontrarse se verifica que el tamaño sea el necesario y divido el bloque con el espacio requerido, armando de esta manera otro bloque cuyo tamaño es la diferencia entre el tamaño del bloque libre y el tamaño del bloque requerido. Retorna un puntero que se encuentra delante del bloque creado.
 
-* void liberar_bloque(void *ptr): Se controla que el puntero pasado como parámetro no sea NULL, en caso de no serlo, obtengo el puntero al bloque apuntado por ptr, y lo marco como libre 
+* void liberar_bloque(void *ptr): Se controla que el puntero pasado como parámetro no sea NULL, en caso de no serlo, obtengo el puntero al bloque apuntado por ptr, y lo marco como libre. Se verifica si hay bloques libres antes o después, e intento fusionarlos.
 
-  /* Obtengo el puntero al bloque apuntado por "ptr" */
-  struct metadata_block* block = obtener_puntero_bloque(ptr);
+* void dividir_bloque(struct metadata_block* block, size_t size): Guarda el tamaño del bloque actual, crea uno nuevo que comience depsues que termine la primera parte del bloque dividido. Si el bloque tenia un bloque siguiente, pone el siguiente del bloque nuevo, como siguiente del bloque anterior(entre medio) y el anterior del siguiente del bloque como el nuevo. Luego se establece el tamaño del bloque como el pasado como parámetro y el siguiente bloque es el nuevo. El tamaño del bloque nuevo es el tamaño total del bloque anterior menos el tamaño del bloque, y el tamaño de la memoria utilizada en la primera división. 
+Se pone el anterior del nuevo como el original y se marca como free al bloque nuevo.
 
-  /* Marco el bloque como libre */
-  block->free = 1;
+* struct metadata_block* fusionar_bloques (struct metadata_block* block): Se verifica si el bloque tiene un siguiente y esta libre, en caso de estarlo, se fusionan ambos bloques. Retorna el bloque recibido como parámetro, pero ahora fusionado.
 
-  /* Veo si hay bloques libres antes o después, intento fusionarlos */
-  if(block->prev && block->prev->free) {
-    block = fusionar_bloques(block->prev);
-  }
+* struct metadata_block *encontrar_bloque_libre(struct metadata_block **last, size_t size): Consiste en recorrer la lista desde la base buscando un bloque que este libre y que su tamaño sea mayor o igual al tamaño necesitado, cuando lo encuentra retorna el bloque encontrado, o NULL en caso de no encontrar ninguno. 
 
-  if(block->next) {
-    block = fusionar_bloques(block);
-  } else {
-    /* Se llego al final de la lista */
-    if (block->prev) {
-      /* Pongo al último bloque como libre */
-      block->free = 1;
-    }
-  }
-}
+* struct metadata_block *extender_heap(struct metadata_block* last, size_t size): Consiste en crear un nuevo bloque, obtener el break y colocar el bloque en dicho lugar. Luegose intenta aumentar el break en el tamaño requerido mas el tamaño del bloque de meta datos, si no se puso aumentar el break, se retorna NULL. Si no es la primera vez, actualizo el siguiente del ultimo bloque.
+Actualizo el tamaño, el bloque siguiente, el bloque anterior y el estado (libre) del nuevo bloque. Retorna el bloque recientemente alocado.
+
+* struct metadata_block *obtener_puntero_bloque(void *ptr) : Consiste en retornar el puntero al bloque deseado, es decir, pasado como parametro.
