@@ -11,15 +11,15 @@
 void* malloc(size_t size);
 
 /*! Declaración de la función free() */
-void free(void *ptr);
+void liberar_bloque(void *ptr);
 
 /*! Declaración de funciones auxiliares */
 struct metadata_block* encontrar_bloque_libre(struct metadata_block** last, size_t size);
 struct metadata_block* extender_heap(struct metadata_block* last, size_t size);
 struct metadata_block* obtener_puntero_bloque(void *ptr);
 struct metadata_block* fusionar_bloques (struct metadata_block* block);
-void split_block(struct metadata_block* block, size_t size);
-void print_list(void);
+void dividir_bloque(struct metadata_block* block, size_t size);
+void imprimir_lista(void);
 
 /*! Estructura del bloque de meta-data */
 struct metadata_block {
@@ -49,41 +49,41 @@ int main(int argc, char *argv[]){
   void *ptr5 = malloc(250);
 
   printf("Luego de alocarlos, la lista que representa el heap queda asi:\n");
-  print_list();
+  imprimir_lista();
 
   printf("\n");
   printf("Libero el bloque de 200 con free(), la tabla queda como la siguiente:\n");
-  free(ptr2);
-  print_list();
+  liberar_bloque(ptr2);
+  imprimir_lista();
 
   printf("\n");
   printf("Aloco memoria con malloc(80), se reutiliza el espacio vacio y se divide el bloque. \n");
   void *ptr6 = malloc(80);
-  print_list();
+  imprimir_lista();
 
   printf("\n");
   printf("Liberamos el bloque que habiamos alocado con malloc(70), y vemos que se va a unir con \n");
   printf("el bloque libre anterior, que surgió de alocar en un espacio libre mas grande. \n");
-  free(ptr3);
-  print_list();
+  liberar_bloque(ptr3);
+  imprimir_lista();
 
   printf("\n");
   printf("Si necesitamos más espacio que el que hay libre en algún bloque, se agranda el break. \n");
   void *ptr7 = malloc(256);
-  print_list();
+  imprimir_lista();
 
   printf("\n");
   printf("Si libero todo lo ocupado.\n");
-  free(ptr1);
-  free(ptr4);
-  free(ptr5);
-  free(ptr6);
-  free(ptr7);
-  print_list();
+  liberar_bloque(ptr1);
+  liberar_bloque(ptr4);
+  liberar_bloque(ptr5);
+  liberar_bloque(ptr6);
+  liberar_bloque(ptr7);
+  imprimir_lista();
   printf("\n");
   printf("Alloco de nuevo con malloc(90), se reutiliza lo anteriormente alocado, y se divide.\n");
   void *ptr8 = malloc(90);
-  print_list();
+  imprimir_lista();
     return 0;
 }
 
@@ -128,7 +128,7 @@ void *malloc(size_t size) {
         /* Si se encontro un bloque libre, me fijo que sea del tamaño necesario */
         if((block->size - size) >= META_SIZE + 4) {
           /* Y divido, tomo el espacio que necesito y armo otro bloque con el resto */
-          split_block(block, size);
+          dividir_bloque(block, size);
 
         }
 
@@ -141,7 +141,7 @@ void *malloc(size_t size) {
 }
 
 /* Función free() */
-void free(void *ptr) {
+void liberar_bloque(void *ptr) {
   /* Controlo que el puntero pasado no sea NULL */
   if (!ptr) {
     return;
@@ -170,7 +170,7 @@ void free(void *ptr) {
 }
 
 /* Función split_block() */
-void split_block(struct metadata_block* block, size_t size) {
+void dividir_bloque(struct metadata_block* block, size_t size) {
   /*Guardo el tamaño total del bloque actual*/
   size_t total_size = block->size;
 
@@ -271,7 +271,7 @@ struct metadata_block *obtener_puntero_bloque(void *ptr) {
 /* Función print_list() */
 /* Sólo para debugging, imprime la lista doblemente enlazada
    de una forma que sea sencilla de ver e interpretar */
-void print_list() {
+void imprimir_lista() {
     struct metadata_block *b = base;
 
     /* Si la lista esta vacia no hago nada */
