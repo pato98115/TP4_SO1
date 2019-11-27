@@ -13,7 +13,7 @@ struct s_block {
 typedef struct s_block *t_block ;
 
 /* Define the block size since the sizeof will be wrong*/
-# define BLOCK_SIZE 20 //sizeof(struct s_block) - 4
+# define BLOCK_SIZE sizeof(struct s_block) //20 //sizeof(struct s_block) - 4
 
 /*! Para alinear punteros, se utilizan tamaños muliplos de 32 bits (4 bytes). Se usan operadores bitwise */
 #define align4(x) (((((x)-1)>>2)<<2)+4)
@@ -101,7 +101,7 @@ void *malloc(size_t size) {
 
     if (base != NULL) {
 
-        printf("malloc1 \n"); //************************************
+       // printf("malloc1 \n"); //************************************
 
         /* First find a block */
         last = base;
@@ -135,7 +135,7 @@ void *malloc(size_t size) {
     } 
     else {
 
-        //printf("malloc6 \n"); //************************************
+       // printf("malloc6 \n"); //************************************
 
         /* first time */
         bloque = extend_heap (NULL ,s);
@@ -144,6 +144,7 @@ void *malloc(size_t size) {
             return (NULL);
         }
         base = bloque;
+        //printf("holaaaaa\n");
     }
     return (bloque->data);
 }
@@ -152,19 +153,19 @@ void *malloc(size_t size) {
 /* Función free() */
 void free(void *p){
 
-    printf("\n %10p \n\n", p);//************************!!!!!!
+    //printf("\n %10p \n\n", p);//************************!!!!!!
 
     t_block b;
     if (valid_addr(p)){
 
-        printf("aca1 \n");//************************!!!!!!
+        //printf("aca1 \n");//************************!!!!!!
 
         b = get_block(p);
         b->free = 1;
         /* fusion with previous if possible */
         if(b->prev && b->prev->free){
 
-            printf("aca2 \n");//************************!!!!!!
+            //printf("aca2 \n");//************************!!!!!!
 
             b = fusion (b->prev );
         }
@@ -175,19 +176,19 @@ void free(void *p){
         else{
             /* free the end of the heap */
 
-            printf("aca3 \n");//************************!!!!!!
+            //printf("aca3 \n");//************************!!!!!!
 
             if (b->prev){
                 b->prev->next = NULL;
 
-                printf("aca4 \n");//************************!!!!!!
+               // printf("aca4 \n");//************************!!!!!!
 
             
             }
             else{
                 /* No more block !*/
 
-                printf("aca5 \n");//************************!!!!!!
+                //printf("aca5 \n");//************************!!!!!!
 
             
                 base = NULL;
@@ -197,7 +198,7 @@ void free(void *p){
     }
     else{
 
-        printf("aca6 \n");//************************!!!!!!
+        //printf("aca6 \n");//************************!!!!!!
 
     }
 }
@@ -214,20 +215,20 @@ t_block get_block (void *p) {
 int valid_addr (void *p){
     if (base){
 
-            printf("aca7 \n");//************************!!!!!!
+            //printf("aca7 \n");//************************!!!!!!
 
             
         if ( p>base && p< sbrk(0)){
 
 
-            printf("aca8 \n");//************************!!!!!!
+            //printf("aca8 \n");//************************!!!!!!
 
 
             return (p == ( get_block(p))->ptr );
         }
     }
 
-            printf("aca9 \n");//************************!!!!!!
+            //printf("aca9 \n");//************************!!!!!!
 
             
     return (0);
@@ -288,7 +289,7 @@ t_block extend_heap ( t_block last , size_t s){
     //printf("    \n\n");//************************!!!!!!
     if (sb == (void*)-1){
 
-            printf("aca10 \n");//************************!!!!!!
+            //printf("aca10 \n");//************************!!!!!!
 
             
         return (NULL);
